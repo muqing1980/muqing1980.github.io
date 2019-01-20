@@ -6,16 +6,32 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="https://github.com/muqing1980">
-  <title>Archives | Little_Mac的博客</title>
+  <title>JDK8 的Lambda和Stream | Little_Mac的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="Java,大数据,并发,开发者,程序猿,编程,代码,开源,Developer,Programmer,Coder">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Little_Mac的博客">
-<meta property="og:url" content="https://github.com/muqing1980/archives/index.html">
+  <meta name="description" content="从JDK 8开始JAVA迎来了官方支持的函数式编程，本文对两组重要的函数式编程的api做了简要的介绍。 lambda表达式lambda wiki百科：  a function (or a subroutine) defined, and possibly called, without being bound to an identifier。  一个不用被绑定到一个标识符上，并且可能被调用的函数">
+<meta name="keywords" content="Java,大数据,并发,开发者,程序猿,编程,代码,开源,Developer,Programmer,Coder">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JDK8 的Lambda和Stream">
+<meta property="og:url" content="https://github.com/muqing1980/2019/01/18/lambda-and-stream/index.html">
 <meta property="og:site_name" content="Little_Mac的博客">
+<meta property="og:description" content="从JDK 8开始JAVA迎来了官方支持的函数式编程，本文对两组重要的函数式编程的api做了简要的介绍。 lambda表达式lambda wiki百科：  a function (or a subroutine) defined, and possibly called, without being bound to an identifier。  一个不用被绑定到一个标识符上，并且可能被调用的函数">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/images/lambda-stream/Stream语法.png">
+<meta property="og:image" content="https://github.com/images/lambda-stream/stream-filter.png">
+<meta property="og:image" content="https://github.com/images/lambda-stream/Stream-pipeline.png">
+<meta property="og:image" content="https://github.com/images/lambda-stream/distinct.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/filter.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/map.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/flatMap.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/peek.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/limit.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/skip.jpg">
+<meta property="og:image" content="https://github.com/images/lambda-stream/reduce.jpg">
+<meta property="og:updated_time" content="2019-01-20T04:08:59.581Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Little_Mac的博客">
+<meta name="twitter:title" content="JDK8 的Lambda和Stream">
+<meta name="twitter:description" content="从JDK 8开始JAVA迎来了官方支持的函数式编程，本文对两组重要的函数式编程的api做了简要的介绍。 lambda表达式lambda wiki百科：  a function (or a subroutine) defined, and possibly called, without being bound to an identifier。  一个不用被绑定到一个标识符上，并且可能被调用的函数">
+<meta name="twitter:image" content="https://github.com/images/lambda-stream/Stream语法.png">
   
     <link rel="alternative" href="/atom.xml" title="Little_Mac的博客" type="application/atom+xml">
   
@@ -155,113 +171,407 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-lambda-and-stream" class="article article-type-post " itemscope="" itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      JDK8 的Lambda和Stream
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/01/18/lambda-and-stream/" class="archive-article-date">
+
+        
+        <a href="/2019/01/18/lambda-and-stream/" class="archive-article-date">
   	<time datetime="2019-01-18T13:55:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-01-18</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/01/18/lambda-and-stream/">JDK8 的Lambda和Stream</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>从JDK 8开始JAVA迎来了官方支持的函数式编程，本文对两组重要的函数式编程的api做了简要的介绍。</p>
+<h1 id="lambda表达式"><a href="#lambda表达式" class="headerlink" title="lambda表达式"></a>lambda表达式</h1><p><a href="http://ifeve.com/lambda/" target="_blank" rel="noopener">lambda</a></p>
+<p>wiki百科：</p>
+<blockquote>
+<p>a function (or a subroutine) defined, and possibly called, without being bound to an identifier。</p>
+</blockquote>
+<p>一个不用被绑定到一个标识符上，并且可能被调用的函数。</p>
+<p>举例：</p>
+<p>将一个字符串列表的每一项转换成小写字符</p>
+<p>JDK7 及以前的写法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">names.add(<span class="string">"first"</span>);</span><br><span class="line">names.add(<span class="string">"second"</span>);</span><br><span class="line">List&lt;String&gt; result = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span>(String name : names)&#123;</span><br><span class="line">    result.add(name.toLowerCase());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Guava 写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">names.add(<span class="string">"first"</span>);</span><br><span class="line">names.add(<span class="string">"second"</span>);</span><br><span class="line">List&lt;String&gt; result = FluentIterable.from(names).transform(<span class="keyword">new</span> Function&lt;String,String&gt;()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">apply</span><span class="params">(String name)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name.toLowerCase();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).toList();</span><br></pre></td></tr></table></figure>
+<h2 id="Lambda语法详解"><a href="#Lambda语法详解" class="headerlink" title="Lambda语法详解"></a>Lambda语法详解</h2><p>抽象下lambda的表达式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(Type1 param1,Type2 param2,...,TypeN paramN)-&gt;&#123;</span><br><span class="line">    statment1;</span><br><span class="line">    statment2;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>lambda 有多个语法糖可以简化写法：</p>
+<ul>
+<li><p>参数类型省略</p>
+<p>jdk8 的编译器可以从上下文环境中推断出lambda的表达式的参数类型</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(param1, param2,...,paramN)-&gt;&#123;</span><br><span class="line"> statment1;</span><br><span class="line"> statment2;</span><br><span class="line"> <span class="comment">//...</span></span><br><span class="line"> <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的例子就可以写成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">names.add(<span class="string">"first"</span>);</span><br><span class="line">names.add(<span class="string">"second"</span>);</span><br><span class="line">List&lt;String&gt; result = names.map((name)-&gt;&#123;</span><br><span class="line">    <span class="keyword">return</span> name.toLowerCase();</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当lambda表达式参数只有一个，可以省略小括号</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">param1-&gt;&#123;</span><br><span class="line"> statment1;</span><br><span class="line"> statment2;</span><br><span class="line"> <span class="comment">//...</span></span><br><span class="line"> <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 上面的例子就可以写成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">names.add(<span class="string">"first"</span>);</span><br><span class="line">names.add(<span class="string">"second"</span>);</span><br><span class="line">List&lt;String&gt; result = names.map(name-&gt;&#123;</span><br><span class="line"> <span class="keyword">return</span> name.toLowerCase();</span><br><span class="line">&#125;).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当lambda表达式只有一条语句是，可以省略大括号，return 和语句结尾的分隔符</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">param1-&gt; statmentment</span><br></pre></td></tr></table></figure>
+<pre><code>上面的例子可以写成：
+</code></pre><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; names = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">names.add(<span class="string">"first"</span>);</span><br><span class="line">names.add(<span class="string">"second"</span>);</span><br><span class="line">List&lt;String&gt; result = names.map(name-&gt;name.toLowerCase()).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+<h2 id="Lambda表达式外部的世界"><a href="#Lambda表达式外部的世界" class="headerlink" title="Lambda表达式外部的世界"></a>Lambda表达式外部的世界</h2><p>Lambda 表达式可以访问外部变量。</p>
+<p>举个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String[] array=&#123;<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"c"</span>&#125;;</span><br><span class="line"><span class="keyword">for</span>(Integer i : Lists.newArrayList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>))&#123;</span><br><span class="line">    Stream.of(array).map(item-&gt;Strings.padEnd(item,i,<span class="string">"@"</span>))</span><br><span class="line">        .forEach(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这个例子就表示了map 中的 lambda 表达式访问了外部的变量Integer。</p>
+<p>访问外部变量是lambda表达式的一个重要特性。</p>
+<p>由上可以看出lambda有三个重要的组成部分：</p>
+<ul>
+<li><p>输入参数</p>
+</li>
+<li><p>可执行语句</p>
+</li>
+<li><p>存放外部变量的空间</p>
+</li>
+</ul>
+<p><strong>注意：外部变量时不可变的</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">String[] array=&#123;<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"c"</span>&#125;;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">4</span>;i++)&#123;</span><br><span class="line">    Stream.of(array).map(item-&gt;Strings.padEnd(item,i,<span class="string">"@"</span>))</span><br><span class="line">         .forEach(System.out::println);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码会报编译错误，lambda 表达式引用的变量需要时final或等效final的变量。</p>
+<h2 id="lambda中的this"><a href="#lambda中的this" class="headerlink" title="lambda中的this"></a>lambda中的this</h2><p>在lambda 中，this不是指向lambda表达式产生的那个SAM对象，而是声明它外部的额对象。</p>
+<h2 id="方法和构造器引用"><a href="#方法和构造器引用" class="headerlink" title="方法和构造器引用"></a>方法和构造器引用</h2><h4 id="方法引用"><a href="#方法引用" class="headerlink" title="方法引用"></a>方法引用</h4><p>方法引用的语法格式有以下三种：</p>
+<ul>
+<li><p><code>objectName::instanceMethod</code></p>
+</li>
+<li><p><code>ClassName::staticMethod</code></p>
+</li>
+<li><p><code>ClassName::instanceMethod</code></p>
+</li>
+</ul>
+<p>前两中等同于 把lambda表达式的参数当成<code>instanceMethod</code> | <code>staticMethod</code> 的参数来调用；</p>
+<p>后一种等于 把lambda表达式的第一个参数当成instanceMethod 的目标对象，其他参数当成该方法的参数，例如：<code>String::toLowerCase()</code> 等同于<code>x-&gt;x.toLowerCase()</code></p>
+<h4 id="构造器引用"><a href="#构造器引用" class="headerlink" title="构造器引用"></a>构造器引用</h4><p>构造器引用语法如下：</p>
+<p><code>ClassName::new</code></p>
+<p>把lambda表达式的参数当成ClassName构造器的参数。</p>
+<p>例如：<code>BigDecimal::new</code>  等同于 <code>x-&gt;new BigDecimal(x)</code></p>
+<h1 id="Stream语法解析"><a href="#Stream语法解析" class="headerlink" title="Stream语法解析"></a>Stream语法解析</h1><p><a href="http://ifeve.com/stream/" target="_blank" rel="noopener">Stream</a></p>
+<p><a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/index.html" target="_blank" rel="noopener">Java 8 中的 Streams API 详解</a></p>
+<p>Java 8 中的 Stream 是对集合（Collection）对象功能的增强，它专注于对集合对象进行各种非常便利、高效的聚合操作（aggregate operation），或者大批量数据操作 (bulk data operation)。</p>
+<p>Stream API 借助于同样新出现的 Lambda 表达式，极大的提高编程效率和程序可读性。</p>
+<p>同时它提供串行和并行两种模式进行汇聚操作，并发模式能够充分利用多核处理器的优势，使用 fork/join 并行方式来拆分任务和加速处理过程。</p>
+<h3 id="1-Stream初见"><a href="#1-Stream初见" class="headerlink" title="1 Stream初见"></a>1 Stream初见</h3><p>Stream 的定义：</p>
+<blockquote>
+<p>A sequence of elements supporting sequential and parallel aggregate operations.</p>
+</blockquote>
+<ul>
+<li><p>Stream是元素的集合，这点让Stream看起来用些类似Iterator；</p>
+</li>
+<li><p>可以支持顺序和并行的对原Stream进行汇聚的操作；</p>
+</li>
+</ul>
+<p><strong>Stream当成一个高级版本的Iterator。原始版本的Iterator，用户只能一个一个的遍历元素并对其执行某些操作；高级版本的Stream，用户只要给出需要对其包含的元素执行什么操作</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; nums = Lists.newArrayList(<span class="number">1</span>,<span class="keyword">null</span>,<span class="number">3</span>,<span class="keyword">null</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">nums.stream().filter(it-&gt;it!=<span class="keyword">null</span>).count();</span><br><span class="line"><span class="comment">// result is 4</span></span><br></pre></td></tr></table></figure>
+<p>以上代码描述了统计列表中不为null的数据个数。</p>
+<h5 id="1-1-Stream的通用语法"><a href="#1-1-Stream的通用语法" class="headerlink" title="1.1 Stream的通用语法"></a>1.1 Stream的通用语法</h5><p><img src="/images/lambda-stream/Stream语法.png" alt="Stream语法"></p>
+<p>一条语句被三种颜色的框分割成了三个部分：</p>
+<ul>
+<li><p>红色框中的语句是一个Stream的生命开始的地方，负责创建一个Stream实例；</p>
+</li>
+<li><p>绿色框中的语句是赋予Stream灵魂的地方，把一个Stream转换成另外一个Stream，红框的语句生成的是一个包含所有nums变量的Stream，进过绿框的filter方法以后，重新生成了一个过滤掉原nums列表所有null以后的Stream；</p>
+</li>
+<li><p>蓝色框中的语句是丰收的地方，把Stream的里面包含的内容按照某种算法来汇聚成一个值，例子中是获取Stream中包含的元素个数。</p>
+</li>
+</ul>
+<p><img src="/images/lambda-stream/stream-filter.png" alt="stream-filter"></p>
+<p>绿框中转换的部分如上图。</p>
+<p>使用Stream的基本步骤：</p>
+<ul>
+<li><p>创建Stream；</p>
+</li>
+<li><p>转换Stream，每次转换原有Stream对象不改变，返回一个新的Stream对象（<strong>可以有多次转换</strong>）；</p>
+</li>
+<li><p>对Stream进行聚合（Reduce）操作，获取想要的结果</p>
+</li>
+</ul>
+<p><img src="/images/lambda-stream/Stream-pipeline.png" alt="Stream pipeline"></p>
+<h3 id="2-创建Stream"><a href="#2-创建Stream" class="headerlink" title="2 创建Stream"></a>2 创建Stream</h3><p>最长创建Stream的方式有两种：</p>
+<ul>
+<li><p>通过Stream接口的静态工厂方法</p>
+</li>
+<li><p>通过Collection接口的默认方法<code>stream()</code>把一个Collection对象转换为Stream</p>
+</li>
+<li><p>通过数组，Arrays.stream(T array) 或者 Stream.of()</p>
+</li>
+</ul>
+<h4 id="2-1-使用Stream的静态方法来创建Stream"><a href="#2-1-使用Stream的静态方法来创建Stream" class="headerlink" title="2.1 使用Stream的静态方法来创建Stream"></a>2.1 使用Stream的静态方法来创建Stream</h4><ul>
+<li><code>of()</code>方法：有两个overload方法，一个接受变长参数，一个接口单一值；</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; integerStream = Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;String&gt; stringStream = Stream.of(<span class="string">"baobaotao"</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>generator</code>方法:</li>
+</ul>
+<p>生成一个无限长度的<code>Stream</code>，其元素生成时通过给定的<code>Supplier</code>接口提供.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Stream.generate(<span class="keyword">new</span> Supplier&lt;Double&gt;()&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Double <span class="title">get</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Math.random();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">Stream.generate(()-&gt;Math.random());</span><br><span class="line">Stream.generate(Math::random);</span><br></pre></td></tr></table></figure>
+<p>三条语句的作用都是一样的，只是使用了lambda表达式和方法引用的语法来简化代码。每条语句其实都是生成一个无限长度的Stream，其中值是随机的。</p>
+<p><em>这个无限长度Stream是懒加载，一般这种无限长度的Stream都会配合Stream的limit()方法来用。</em></p>
+<ul>
+<li><code>iterate</code>方法：</li>
+</ul>
+<p>也是生成无限长度的Stream，和generator不同的是，其元素的生成是重复对给定的种子值(seed)调用用户指定函数来生成的。其中包含的元素可以认为是：seed，f(seed),f(f(seed))无限循环。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.iterate(<span class="number">1</span>,it-&gt;it*<span class="number">2</span>).limit(<span class="number">10</span>).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<p>这段代码就是先获取一个无限长度的正整数集合的Stream，然后取出前10个打印。</p>
+<h4 id="2-2-通过Collection子类获取Stream"><a href="#2-2-通过Collection子类获取Stream" class="headerlink" title="2.2 通过Collection子类获取Stream"></a>2.2 通过Collection子类获取Stream</h4><p>Collection接口有一个stream方法，所以其所有子类都都可以获取对应的Stream对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Collection</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">Iterable</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//其他方法省略</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> Stream&lt;E&gt; <span class="title">stream</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> StreamSupport.stream(spliterator(), <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-转换Stream"><a href="#3-转换Stream" class="headerlink" title="3 转换Stream"></a>3 转换Stream</h3><p>转换Stream其实就是把一个Stream通过某些行为转换成一个新的Stream。Stream接口中定义了几个常用的转换方法：</p>
+<ul>
+<li><code>distinct</code> ：对于Stream中包含的元素进行去重操作(依赖于元素的<code>equals</code>方法),新生成的Stream中没有重复的元素。</li>
+</ul>
+<p><img src="/images/lambda-stream/distinct.jpg" alt="distinct"></p>
+<ul>
+<li><code>filter</code>:对于Stream中包含的元素使用给定的过滤函数进行过滤操作，新生成的Stream只包含符合条件的元素；</li>
+</ul>
+<p><img src="/images/lambda-stream/filter.jpg" alt="filter"></p>
+<ul>
+<li><p><code>map</code>:对于Stream中包含的元素使用给定的转换函数进行转换操作，新生成的Stream只包含转换生成的元素</p>
+<p>这个方法有三个对于原始类型的变种方法，分别是：mapToInt，mapToLong和mapToDouble。</p>
+</li>
+</ul>
+<p><img src="/images/lambda-stream/map.jpg" alt="map"></p>
+<ul>
+<li><code>flatMap</code>:和map类似，不同的是其每个元素转换得到的是Stream对象，会把子Stream中的元素压缩到父集合中；</li>
+</ul>
+<p><img src="/images/lambda-stream/flatMap.jpg" alt="flatMap"></p>
+<ul>
+<li><code>peek</code>:生成一个包含原Stream的所有元素的新Stream，同时会提供一个消费函数（Consumer实例），新Stream每个元素被消费的时候都会执行给定的消费函数；</li>
+</ul>
+<p><img src="/images/lambda-stream/peek.jpg" alt="peek"></p>
+<ul>
+<li><code>limit</code>:对一个Stream进行截断操作，获取其前N个元素，如果原Stream中包含的元素个数小于N，那就获取其所有的元素；</li>
+</ul>
+<p><img src="/images/lambda-stream/limit.jpg" alt="limit"></p>
+<ul>
+<li><code>skip</code>:返回一个丢弃原Stream的前N个元素后剩下元素组成的新Stream，如果原Stream中包含的元素个数小于N，那么返回空Stream；</li>
+</ul>
+<p><img src="/images/lambda-stream/skip.jpg" alt="skip"></p>
+<ul>
+<li>综合应用</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; nums = Lists.newArrayList(<span class="number">1</span>,<span class="number">1</span>,<span class="keyword">null</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="keyword">null</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>)</span><br><span class="line">System.out.println(<span class="string">"sum is : "</span> + nums.stream()</span><br><span class="line">        .filter(i-&gt;i!=<span class="keyword">null</span>).distinct().mapToInt(i-&gt;i*<span class="number">2</span>).peek(System.out::println).skip(<span class="number">2</span>).limit(<span class="number">4</span>).sum());</span><br></pre></td></tr></table></figure>
+<p>给定一个<code>Integer</code>类型的<code>List</code>，获取其对应的<code>Stream</code>对象，然后进行过滤掉<code>null</code>，再去重，再每个元素乘以<code>2</code>，再每个元素被消费的时候打印自身，在跳过前两个元素，最后去前四个元素进行加和运算.</p>
+<ul>
+<li>性能问题：</li>
+</ul>
+<p>对于一个Stream进行多次转换操作，每次都对Stream的每个元素进行转换，而且是执行多次，这样时间复杂度就是一个for循环里把所有操作都做掉的N（转换的次数）倍？</p>
+<p>答案是否定的：</p>
+<p><strong>转换操作都是lazy的，多个转换操作只会在汇聚操作的时候融合起来，一次循环完成。可以这样简单的理解，Stream里有个操作函数的集合，每次转换操作就是把转换函数放入这个集合中，在汇聚操作的时候循环Stream对应的集合，然后对每个元素执行所有的函数。</strong></p>
+<h3 id="4-汇聚-Reduce-Stream"><a href="#4-汇聚-Reduce-Stream" class="headerlink" title="4 汇聚(Reduce)Stream"></a>4 汇聚(Reduce)Stream</h3><p>Java doc中对于Reduce的定义</p>
+<blockquote>
+<p>A reduction operation (also called a fold) takes a sequence of input elements and combines them into a single summary result by repeated application of a combining operation, such as finding the sum or maximum of a set of numbers, or accumulating elements into a list. The streams classes have multiple forms of general reduction operations, called <code>reduce()</code> and <code>collect()</code>, as well as multiple specialized reduction forms such as <code>sum()</code>, <code>max()</code>, or <code>count()</code>.</p>
+</blockquote>
+<p><code>Reduce</code>操作接受一个元素序列为输入，反复使用某个合并操作，把序列中的元素合并成一个汇总的结果。比如查找一个数字列表的总和或者最大值，或者把这些数字累积成一个List对象。Stream接口有一些通用的汇聚操作，比如<code>reduce()</code>和<code>collect()</code>；也有一些特定用途的汇聚操作，比如<code>sum()</code>,<code>max()</code>和<code>count()</code>。</p>
+<p><strong>注意：sum方法不是所有的Stream对象都有的，只有IntStream、LongStream和DoubleStream是实例才有。</strong></p>
+<h4 id="4-1-可变汇聚"><a href="#4-1-可变汇聚" class="headerlink" title="4.1 可变汇聚"></a>4.1 可变汇聚</h4><p>把输入的元素们累积到一个可变的容器中，比如Collection或者StringBuilder。</p>
+<p>可变汇聚对应的只有一个方法：collect，正如其名字显示的，它可以把Stream中的要有元素收集到一个结果容器中（比如Collection）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;R&gt; <span class="function">R <span class="title">collect</span><span class="params">(Supplier&lt;R&gt; supplier, BiConsumer&lt;R,? <span class="keyword">super</span> T&gt; accumulator, BiConsumer&lt;R,R)</span> combiner)</span>;</span><br></pre></td></tr></table></figure>
+<p>这三个参数的含义：Supplier supplier是一个工厂函数，用来生成一个新的容器；BiConsumer accumulator也是一个函数，用来把Stream中的元素添加到结果容器中；BiConsumer combiner还是一个函数，用来把中间状态的多个结果容器合并成为一个（并发的时候会用到）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; nums=Lists.newArrayList(<span class="number">1</span>,<span class="number">1</span>,<span class="keyword">null</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="keyword">null</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>);</span><br><span class="line">List&lt;Integer&gt; numsWithoutNull = nums.stream().filter(it-&gt;it!=<span class="keyword">null</span>).collect(()-&gt;<span class="keyword">new</span> ArrayList&lt;Integer&gt;(), (list,item)-&gt;list.add(item),(list1,list2)-&gt;list1.addAll(list2));</span><br></pre></td></tr></table></figure>
+<p>上面这段代码就是对一个元素是Integer类型的List，先过滤掉全部的null，然后把剩下的元素收集到一个新的List中。</p>
+<p>进一步看一下collect方法的三个参数，都是lambda形式的函数:</p>
+<ul>
+<li><p>第一个函数生成一个新的ArrayList实例；</p>
+</li>
+<li><p>第二个函数接受两个参数，第一个是前面生成的ArrayList对象，二个是stream中包含的元素，函数体就是把stream中的元素加入ArrayList对象中;</p>
+</li>
+<li><p>第二个函数被反复调用直到原stream的元素被消费完毕；</p>
+</li>
+<li><p>第二个函数被反复调用直到原stream的元素被消费完毕；</p>
+</li>
+</ul>
+<p>collect方法另外一个override的版本:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;R,A&gt; <span class="function">R <span class="title">collect</span><span class="params">(Collector&lt;? <span class="keyword">super</span> T,A,R&gt; collector)</span></span></span><br></pre></td></tr></table></figure>
+<p><strong>类–[Collectors]</strong>,已经定义了一些静态工厂方法:</p>
+<ul>
+<li><p>Collectors.toCollection()收集到Collection中;</p>
+</li>
+<li><p>Collectors.toList()收集到List中;</p>
+</li>
+<li><p>Collectors.toSet()收集到Set中</p>
+</li>
+<li><p>还有其他一些静态方法，可以看JavaDoc。</p>
+</li>
+</ul>
+<p>简化后的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; nums=Lists.newArrayList(<span class="number">1</span>,<span class="number">1</span>,<span class="keyword">null</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="keyword">null</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>);</span><br><span class="line">nums.stream().filter(it-&gt;it!=<span class="keyword">null</span>).collect(Collectors.toList())</span><br></pre></td></tr></table></figure>
+<h4 id="4-2-其他汇聚"><a href="#4-2-其他汇聚" class="headerlink" title="4.2 其他汇聚"></a>4.2 其他汇聚</h4><h5 id="reduce-方法："><a href="#reduce-方法：" class="headerlink" title="reduce 方法："></a><code>reduce</code> 方法：</h5><p>有三个override方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Optional&lt;T&gt; <span class="title">reduce</span><span class="params">(BinaryOperator&lt;T&gt; accumulator)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>接受一个BinaryOperator类型的参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints=Lists.newArrayList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>);</span><br><span class="line">System.out.println(<span class="string">"ints sum is:"</span>+ints.stream().reduce((sum,item) -&gt; sum + item)).get();</span><br></pre></td></tr></table></figure>
+<p>reduce方法接受一个函数，这个函数有两个参数，</p>
+<ul>
+<li><p>第一个参数是上次函数执行的返回值（也称为中间结果）;</p>
+</li>
+<li><p>第二个参数是stream中的元素，这个函数把这两个值相加，得到的和会被赋值给下次执行这个函数的第一个参数。</p>
+</li>
+</ul>
+<p><strong>注意 ：第一次执行的时候第一个参数的值是Stream的第一个元素，第二个参数是Stream的第二个元素</strong></p>
+<p>计算的可视化过程：</p>
+<p><img src="/images/lambda-stream/reduce.jpg" alt="reduce"></p>
+<p>reduce方法还有一个很常用的变种：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">T <span class="title">reduce</span><span class="params">(T identity, BinaryOperator&lt;T&gt; accumulator)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这个变种功能和上面的一样，唯一不同的是允许用户提供一个循环计算的初始值，如果stream为空，则直接返回初始值 identity。这个方法不会返回Optional，因为不会出现null值。</p>
+<p>上面的例子改造为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints=Lists.newArrayList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>);</span><br><span class="line">System.out.println(<span class="string">"ints sum is:"</span>+ints.stream().reduce(<span class="number">0</span>,(sum,item) -&gt; sum + item));</span><br></pre></td></tr></table></figure>
+<h5 id="count-方法："><a href="#count-方法：" class="headerlink" title="count 方法："></a><code>count</code> 方法：</h5><p>获取Stream中的元素个数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints=Lists.newArrayList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>);</span><br><span class="line">System.out.println(<span class="string">"ints count is:"</span>+ints.stream().count();</span><br></pre></td></tr></table></figure>
+<h5 id="其他方法："><a href="#其他方法：" class="headerlink" title="其他方法："></a>其他方法：</h5><ul>
+<li><p>allMatch：判断是否是全部的元素都满足给定匹配条件；</p>
+</li>
+<li><p>noneMatch：判断是否是全部的元素都不满足给定匹配条件；</p>
+</li>
+<li><p>anyMatch: Stream中是否存在至少一个满足匹配条件；</p>
+</li>
+<li><p>findFirst：返回Stream中的第一个元素；</p>
+</li>
+<li><p>max：使用比较器（Operator），返回Stream中最大值；</p>
+</li>
+<li><p>min: 使用比较器（Operator），返回Stream中最小值；</p>
+</li>
+</ul>
 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://github.com/muqing1980/2019/01/18/lambda-and-stream/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-      
-        </div></section>
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/12/17/Scalable-IO-in-Java/" class="archive-article-date">
-  	<time datetime="2018-12-17T13:45:52.213Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-12-17</time>
-</a>
-        </div>
-    	 
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/12/17/Scalable-IO-in-Java/">Scalable IO in Java</a>
-    </h1>
+  
+    <a href="/2018/12/17/Scalable-IO-in-Java/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Scalable IO in Java</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/11/30/hello-world/" class="archive-article-date">
-  	<time datetime="2018-11-29T22:43:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/11/30/hello-world/">Hello World</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
   
 
-    
+  
 
 
           </div>
@@ -284,8 +594,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
